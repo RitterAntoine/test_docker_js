@@ -1,0 +1,22 @@
+# Dépendances Node.js
+node_modules/
+package-lock.json
+
+# Fichiers de logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dossiers temporaires
+tmp/
+temp/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Dossiers de vues (si générés dynamiquement, sinon retire cette ligne)
+# app/views/
+
+# Environnements
+.env
