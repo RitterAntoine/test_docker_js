@@ -1,6 +1,6 @@
 # Projet Node.js avec Docker et MongoDB
 
-Ce projet est une application simple utilisant Node.js, Express, MongoDB et Docker. Il permet aux utilisateurs de se connecter avec des identifiants et d'afficher une liste d'utilisateurs depuis une base de données MongoDB.
+Ce projet est une application simple utilisant Node.js, Express, MongoDB et Docker. Il permet aux utilisateurs de se connecter, de s'inscrire et d'afficher une liste d'utilisateurs depuis une base de données MongoDB. L'interface est harmonisée grâce à un fichier CSS commun.
 
 ## Prérequis
 
@@ -19,6 +19,12 @@ Voici la structure du projet :
 |   |-- Dockerfile
 |   |-- package.json
 |   |-- server.js
+|   |-- /views
+|   |   |-- login.ejs
+|   |   |-- register.ejs
+|   |   |-- dashboard.ejs
+|   |-- /public
+|   |   |-- styles.css
 |-- docker-compose.yml
 |-- README.md
 ```
@@ -45,28 +51,16 @@ docker-compose up --build
 
 ## Utilisation
 
-1. Accédez à l'application dans votre navigateur web à l'adresse suivante : ``` http://localhost:3000 ```
+1. Accédez à l'application dans votre navigateur web à l'adresse suivante : [http://localhost:3000](http://localhost:3000)
 
-2. Connectez-vous avec les identifiants suivants :
-- Nom d'utilisateur : ```admin```
-- Mot de passe : ```admin```
+2. Vous pouvez :
+   - **Créer un compte** via le bouton "Créer un compte"
+   - **Vous connecter** avec un compte existant
 
-3. Une fois connecté, vous serez redirigé vers le tableau de bord où vous verrez la liste des utilisateurs.
+3. Une fois connecté, vous serez redirigé vers le dashboard où vous verrez la liste des utilisateurs présents dans la base de données.
 
-## Ajouter un utilisateur
 
-Pour ajouter un utilisateur à la base de données, accédez à l'URL suivante dans votre navigateur : ```http://localhost:3000/adduser```
+## Personnalisation du style
 
-## Contribuer
-
-Les contributions sont les bienvenues ! Pour contribuer à ce projet, veuillez suivre les étapes suivantes :
-
-1. Fork le projet
-2. Créez une branche pour votre fonctionnalité (```git checkout -b feature/AmazingFeature```)
-3. Commitez vos changements (```git commit -m 'Add some AmazingFeature'```)
-4. Poussez vers la branche (```git push origin feature/AmazingFeature```)
-5. Ouvrez une Pull Request
-
-## Licence
-
-Distribué sous la licence MIT. Voir ```LICENSE``` pour plus d'informations.
+Le style de l'application est centralisé dans le fichier `/app/public/styles.css`.  
+Vous pouvez le modifier pour personnaliser l'apparence de toutes les pages (`login`, `register`, `dashboard`).

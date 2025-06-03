@@ -84,21 +84,6 @@ app.get('/dashboard', async (req, res) => {
     }
 });
 
-// Route pour ajouter un utilisateur
-app.get('/adduser', async (req, res) => {
-    try {
-        const newUser = new User({
-            username: 'admin',
-            password: 'admin'
-        });
-
-        await newUser.save();
-        res.send('User added successfully');
-    } catch (error) {
-        res.status(500).send('Error adding user');
-    }
-});
-
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
