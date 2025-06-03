@@ -1,0 +1,12 @@
+<h1>Welcome <%= username %>!</h1>
+<h2>List of Users:</h2>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Username</th>
+    </tr>
+    <% users.forEach(function(user) { %>
+        <tr>
+            <td><%= user.username %></td>
+        </tr>
+    <% }); %>
+</table>

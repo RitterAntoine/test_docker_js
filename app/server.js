@@ -14,6 +14,9 @@ app.use(session({
     saveUninitialized: true
 }));
 
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
 // Connexion à MongoDB
 mongoose.connect('mongodb://mongo:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -27,30 +30,12 @@ const User = mongoose.model('User', userSchema);
 
 // Route pour la page de login
 app.get('/', (req, res) => {
-    res.send(`
-        <h2>Login</h2>
-        <form method="post" action="/login">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <form method="get" action="/register" style="margin-top:10px;">
-            <button type="submit">Register</button>
-        </form>
-    `);
+    res.render('login');
 });
 
 // Nouvelle route pour afficher le formulaire d'inscription
 app.get('/register', (req, res) => {
-    res.send(`
-        <h2>Register</h2>
-        <form method="post" action="/register">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Register</button>
-        </form>
-        <a href="/">Back to login</a>
-    `);
+    res.render('register');
 });
 
 // Nouvelle route pour traiter l'inscription
@@ -88,16 +73,8 @@ app.post('/login', async (req, res) => {
 app.get('/dashboard', async (req, res) => {
     if (req.session.user) {
         try {
-            // Récupérer tous les utilisateurs de la base de données
             const users = await User.find({});
-            const userList = users.map(user => `<li>${user.username}</li>`).join('');
-
-            // Afficher le tableau de bord avec la liste des utilisateurs
-            res.send(`
-                <h1>Welcome ${req.session.user.username}!</h1>
-                <h2>List of Users:</h2>
-                <ul>${userList}</ul>
-            `);
+            res.render('dashboard', { users, username: req.session.user.username });
         } catch (error) {
             res.status(500).send('Error retrieving users');
         }
