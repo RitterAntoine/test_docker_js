@@ -1,12 +1,62 @@
-<h1>Welcome <%= username %>!</h1>
-<h2>List of Users:</h2>
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Username</th>
-    </tr>
-    <% users.forEach(function(user) { %>
-        <tr>
-            <td><%= user.username %></td>
-        </tr>
-    <% }); %>
-</table>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <style>
+        body {
+            background: #f5f6fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+        }
+        .dashboard-container {
+            background: #fff;
+            padding: 32px 28px;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            min-width: 350px;
+            margin-top: 40px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #273c75;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+        th, td {
+            border: 1px solid #dcdde1;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #f5f6fa;
+            color: #273c75;
+        }
+        tr:nth-child(even) {
+            background: #f5f6fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Bienvenue <%= username %> !</h1>
+        <h2>Liste des utilisateurs</h2>
+        <table>
+            <tr>
+                <th>Nom d'utilisateur</th>
+            </tr>
+            <% users.forEach(function(user) { %>
+                <tr>
+                    <td><%= user.username %></td>
+                </tr>
+            <% }); %>
+        </table>
+    </div>
+</body>
+</html>
