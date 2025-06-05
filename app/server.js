@@ -1,87 +1,101 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const session = require('express-session');
+const { OAuth2Client } = require('google-auth-library');
+const mongoose = require('mongoose');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const REDIRECT_URI = 'http://localhost:3000/auth/google/callback';
+
+const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+
 app.use(session({
     secret: 'secret',
     resave: true,
     saveUninitialized: true
 }));
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
+app.set('views', path.join(__dirname, 'views'));
 
-// Connexion à MongoDB
+// Connexion à MongoDB (si tu veux garder la liste des utilisateurs connectés)
 mongoose.connect('mongodb://mongo:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Schéma et modèle pour l'utilisateur
+// Schéma et modèle pour l'utilisateur Google
 const userSchema = new mongoose.Schema({
+    googleId: String,
     username: String,
-    password: String
+    email: String,
+    picture: String
 });
-
 const User = mongoose.model('User', userSchema);
 
-// Route pour la page de login
+// Page de login (bouton Google uniquement)
 app.get('/', (req, res) => {
     res.render('login');
 });
 
-// Nouvelle route pour afficher le formulaire d'inscription
-app.get('/register', (req, res) => {
-    res.render('register');
+// Démarrer l’authentification Google
+app.get('/auth/google', (req, res) => {
+    const url = client.generateAuthUrl({
+        access_type: 'offline',
+        scope: ['profile', 'email'],
+    });
+    res.redirect(url);
 });
 
-// Nouvelle route pour traiter l'inscription
-app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-    try {
-        // Vérifier si l'utilisateur existe déjà
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.send('Username already exists. <a href="/register">Try again</a>');
-        }
-        // Créer le nouvel utilisateur
-        const newUser = new User({ username, password });
-        await newUser.save();
-        res.send('Registration successful. <a href="/">Login here</a>');
-    } catch (error) {
-        res.status(500).send('Error registering user');
+// Callback Google
+app.get('/auth/google/callback', async (req, res) => {
+    const { code } = req.query;
+    if (!code) return res.redirect('/');
+
+    const { tokens } = await client.getToken(code);
+    client.setCredentials(tokens);
+
+    const ticket = await client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    // Enregistrer ou mettre à jour l'utilisateur en base
+    let user = await User.findOne({ googleId: payload.sub });
+    if (!user) {
+        user = new User({
+            googleId: payload.sub,
+            username: payload.name,
+            email: payload.email,
+            picture: payload.picture
+        });
+        await user.save();
     }
+
+    req.session.user = {
+        username: user.username,
+        email: user.email,
+        picture: user.picture
+    };
+    res.redirect('/dashboard');
 });
 
-// Route pour gérer le login
-app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-
-    // Vérification des informations d'identification
-    if (username === 'admin' && password === 'admin') {
-        req.session.user = { username };
-        res.redirect('/dashboard');
-    } else {
-        res.send('Invalid credentials');
-    }
-});
-
-// Route pour le tableau de bord
-app.get('/dashboard', async (req, res) => {
-    if (req.session.user) {
-        try {
-            const users = await User.find({});
-            res.render('dashboard', { users, username: req.session.user.username });
-        } catch (error) {
-            res.status(500).send('Error retrieving users');
-        }
-    } else {
+// Déconnexion
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
         res.redirect('/');
-    }
+    });
+});
+
+// Dashboard
+app.get('/dashboard', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    const users = await User.find({});
+    res.render('dashboard', { users, username: req.session.user.username });
 });
 
 app.listen(PORT, () => {
